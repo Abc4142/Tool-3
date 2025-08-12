@@ -2,44 +2,145 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="Free Plagiarism Checker Tool - Check content originality instantly without any API key." />
-<title>Plagiarism Checker Tool - Home</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Free Plagiarism Checker Tool - Check your content originality instantly, no API key required." />
+  <title>Plagiarism Checker Tool - Home</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9fc;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(135deg, #4a00e0, #8e2de2);
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+    nav {
+      margin-top: 10px;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .hero {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      margin: 20px;
+      border-radius: 12px;
+    }
+    .hero h2 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 25px;
+    }
+    .btn {
+      background: linear-gradient(135deg, #4a00e0, #8e2de2);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+    .btn:hover {
+      background: linear-gradient(135deg, #3b00b8, #701fc6);
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .card h3 {
+      margin-bottom: 10px;
+    }
+    .card p {
+      color: #555;
+    }
+    footer {
+      background: #222;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
 
-<header>
-  <h1>📝 Free Plagiarism Checker Tool</h1>
-  <nav>
-    <a href="index.html">Home</a>
-    <!-- Relative path: works correctly when your site is served from a repo subpath -->
-    <a href="Tool-3/img.plagrisum.html">Plagiarism Checker</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-  </nav>
+  <header>
+    <h1>📝 Free Plagiarism Checker Tool</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="checker.html">Plagiarism Checker</a>
+      <a href="#features">Features</a>
+      <a href="#contact">Contact</a>
+    </nav>
   </header>
 
-  <div class="container">
-    <div class="tool-card">
-      <h2>Check Your Content Originality</h2>
-      <p>Instantly check whether your content is unique with our free plagiarism checker tool. No API key required – fast, accurate, and secure.</p>
-      <a href="/Tool-3/img.plagrisum.html" class="btn">Start Checking</a>
-    </div>
+  <section class="hero">
+    <h2>Check Your Content Originality in Seconds</h2>
+    <p>Ensure your content is 100% unique. Our free tool works instantly, securely, and without the need for any API keys.</p>
+    <a href="checker.html" class="btn">Start Checking</a>
+  </section>
 
-    <div class="tool-card" id="about">
-      <h2>About This Tool</h2>
-      <p>This plagiarism checker tool is completely free to use, requires no login, and works directly in your browser. Ideal for bloggers, students, and content creators who want to ensure originality.</p>
+  <section id="features" class="features">
+    <div class="card">
+      <h3>⚡ Fast & Accurate</h3>
+      <p>Get instant plagiarism results with high precision, saving you valuable time.</p>
     </div>
+    <div class="card">
+      <h3>🔒 Secure</h3>
+      <p>Your text is processed locally in your browser, ensuring complete privacy.</p>
+    </div>
+    <div class="card">
+      <h3>💡 Free & Easy</h3>
+      <p>No sign-ups, no hidden costs, and absolutely no complicated setup.</p>
+    </div>
+  </section>
 
-    <div class="tool-card" id="contact">
-      <h2>Contact Us</h2>
+  <section id="contact" class="features" style="max-width: 600px;">
+    <div class="card">
+      <h3>📩 Contact Us</h3>
       <p>Email: support@plagiarismtool.com</p>
     </div>
-  </div>
+  </section>
 
   <footer>
     <p>© 2025 Plagiarism Checker Tool | Designed for GitHub Pages</p>
   </footer>
+
 </body>
 </html>
 
