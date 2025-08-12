@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plagresium Checker — API-free Plagiarism Tool</title>
+  <meta name="description" content="API-free, client-side plagiarism & similarity checker. Compare texts, upload reference files, get similarity % and detailed report. Perfect for GitHub Pages." />
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#06b6d4;--glass:rgba(255,255,255,0.04)}
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{margin:0;background:linear-gradient(180deg,#061021 0%,#071226 60%);color:#e6eef6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+    .wrap{max-width:1100px;width:100%}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 24px rgba(3,7,18,0.6)}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:20px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.02)}
+
+    textarea{width:100%;min-height:220px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;resize:vertical}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button, .btn{background:linear-gradient(90deg,var(--accent),#8b5cf6);border:none;padding:10px 12px;border-radius:10px;color:#041021;font-weight:600;cursor:pointer}
+    .btn.secondary{background:transparent;color:var(--accent);border:1px dashed rgba(255,255,255,0.06)}
+    .small{font-size:13px;padding:8px 10px}
+
+    .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .chip{background:var(--glass);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
+
+    .result-score{display:flex;align-items:center;gap:12px}
+    .meter{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#0ea5a3 var(--pct), rgba(255,255,255,0.03) 0);box-shadow:inset 0 -10px 30px rgba(0,0,0,0.5)}
+    .meter .val{font-size:20px;font-weight:700}
+
+    .list{margin-top:12px}
+    .list-item{padding:10px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);display:flex;align-items:flex-start;gap:10px}
+    .muted{color:var(--muted);font-size:13px}
+
+    footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
+
+    @media(max-width:980px){.grid{grid-template-columns:1fr}.meter{width:90px;height:90px}.logo{width:48px;height:48px}}
+
+    /* small report table */
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
+
+    .placeholder-ad{margin:12px 0;padding:10px;border-radius:8px;background:linear-gradient(90deg,#071229, #041424);border:1px dashed rgba(255,255,255,0.02);text-align:center;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">PZ</div>
+      <div>
+        <h1>Plagresium Checker — API-free</h1>
+        <p class="lead">Client-side similarity & plagiarism checker. Paste text, upload reference files, compare and download report — sab kuch local browser mein.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <label for="mainText">1) Primary text (jo check karna hai)</label>
+        <textarea id="mainText" placeholder="Yahan apna article ya essay paste karein..."></textarea>
+
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+          <input type="file" id="fileInput" accept=".txt" style="display:none" />
+          <button class="btn small" id="pasteSample">Paste Example</button>
+          <button class="btn small secondary" id="uploadBtn">Upload .txt</button>
+          <button class="btn small" id="saveSnapshot">Save Snapshot</button>
+          <button class="btn small" id="clearBtn">Clear</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <label for="refs">2) Reference texts / comparisons (upload one or more .txt or paste multiple references separated by "---")</label>
+          <textarea id="refs" placeholder="Reference 1 --- Reference 2 (ya multiple files upload karein)"></textarea>
+          <div class="controls">
+            <input type="file" id="refsUpload" accept=".txt" multiple style="display:none" />
+            <button class="btn small" id="addRefFile">Upload References</button>
+            <button class="btn small secondary" id="loadSnapshots">Load Saved Snapshots</button>
+            <button class="btn small" id="runCheck">Run Check</button>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="chip">Words: <span id="wordCount">0</span></div>
+          <div class="chip">Chars: <span id="charCount">0</span></div>
+          <div class="chip">Sentences: <span id="sentCount">0</span></div>
+        </div>
+
+        <div class="placeholder-ad">Ad space / Placeholder for monetization (Add your Ad code here)</div>
+
+        <div style="margin-top:12px">
+          <label class="muted">Notes:</label>
+          <ul class="muted">
+            <li>Yeh tool sirf browser-local comparison karta hai — web-wide plagiarism check ke liye server-side crawlers ya paid APIs ki zarurat hoti hai.</li>
+            <li>Compare multiple references by separating with <code>---</code> or uploading multiple .txt files.</li>
+          </ul>
+        </div>
+      </div>
+
+      <aside class="card">
+        <div class="result-score">
+          <div style="flex:1">
+            <label class="muted">Overall Similarity</label>
+            <div class="meter" id="meter" style="--pct:0deg"><div class="val" id="pctText">0%</div></div>
+          </div>
+          <div style="flex:1">
+            <label class="muted">Top Matches</label>
+            <div class="list" id="matches"></div>
+          </div>
+        </div>
+
+        <div id="reportArea"></div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn small" id="downloadReport">Download Report</button>
+          <button class="btn small secondary" id="exportSnapshots">Export Snapshots</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="muted">Saved Snapshots</label>
+          <div id="snapshotsList"></div>
+        </div>
+
+      </aside>
+    </div>
+
+    <footer>
+      <div>Made for GitHub Pages — Save this file as <code>index.html</code> and push to a repo. Then enable Pages from branch settings.</div>
+    </footer>
+  </div>
+
+<script>
+// Utility functions
+function tokenize(text){
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s\u0900-\u097F]/g,' ') // keep devanagari + alnum
+    .replace(/\s+/g,' ').trim();
+}
+function wordCount(s){ if(!s) return 0; return tokenize(s).split(' ').filter(Boolean).length }
+function charCount(s){ return s? s.length:0 }
+function sentenceCount(s){ if(!s) return 0; return s.split(/[.?!]\s/).filter(Boolean).length }
+
+// Shingling (k-grams)
+function shingles(text, k=5){
+  const t = tokenize(text).split(' ').filter(Boolean);
+  const out = new Set();
+  for(let i=0;i<=t.length-k;i++) out.add(t.slice(i,i+k).join(' '));
+  return out;
+}
+function jaccard(a,b){
+  if(a.size===0 && b.size===0) return 1;
+  const inter = [...a].filter(x=>b.has(x)).length;
+  const uni = new Set([...a,...b]).size;
+  return uni===0?0:inter/uni;
+}
+
+// Longest common substring (word-level)
+function LCSwords(a,b){
+  const A = tokenize(a).split(' ').filter(Boolean);
+  const B = tokenize(b).split(' ').filter(Boolean);
+  const n=A.length,m=B.length;
+  if(n===0||m===0) return 0;
+  const dp = Array(m+1).fill(0);
+  let best=0;
+  for(let i=1;i<=n;i++){
+    for(let j=m;j>=1;j--){
+      if(A[i-1]===B[j-1]) dp[j]=dp[j-1]+1; else dp[j]=0;
+      if(dp[j]>best) best=dp[j];
+    }
+  }
+  return best; // in words
+}
+
+// Read UI elements
+const mainText = document.getElementById('mainText');
+const refs = document.getElementById('refs');
+const wordCountEl = document.getElementById('wordCount');
+const charCountEl = document.getElementById('charCount');
+const sentCountEl = document.getElementById('sentCount');
+const runCheckBtn = document.getElementById('runCheck');
+const meter = document.getElementById('meter');
+const pctText = document.getElementById('pctText');
+const matches = document.getElementById('matches');
+const reportArea = document.getElementById('reportArea');
+const snapshotsList = document.getElementById('snapshotsList');
+
+function updateCounts(){
+  const t = mainText.value;
+  wordCountEl.textContent = wordCount(t);
+  charCountEl.textContent = charCount(t);
+  sentCountEl.textContent = sentenceCount(t);
+}
+mainText.addEventListener('input', updateCounts);
+updateCounts();
+
+// File uploads
+document.getElementById('uploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',async (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const txt = await f.text(); mainText.value = txt; updateCounts();
+});
+
+document.getElementById('addRefFile').addEventListener('click',()=>document.getElementById('refsUpload').click());
+document.getElementById('refsUpload').addEventListener('change',async (e)=>{
+  const files = Array.from(e.target.files);
+  const parts = [];
+  for(const f of files){ parts.push(await f.text()); }
+  refs.value = refs.value + (refs.value?"\n---\n":"") + parts.join('\n---\n');
+});
+
+// Snapshots (localStorage)
+function saveSnapshot(){
+  const key = 'plagresium_snapshots';
+  const data = JSON.parse(localStorage.getItem(key)||'[]');
+  data.push({id:Date.now(),ts:new Date().toISOString(),text:mainText.value});
+  localStorage.setItem(key,JSON.stringify(data));
+  renderSnapshots();
+}
+function renderSnapshots(){
+  const key = 'plagresium_snapshots';
+  const data = JSON.parse(localStorage.getItem(key)||'[]');
+  snapshotsList.innerHTML = '';
+  if(data.length===0){ snapshotsList.innerHTML='<div class="muted">No snapshots saved.</div>'; return }
+  data.slice().reverse().forEach(s=>{
+    const el = document.createElement('div'); el.className='list-item'; el.style.marginTop='8px';
+    el.innerHTML = `<div style="flex:1"><strong>${new Date(s.ts).toLocaleString()}</strong><div class="muted" style="margin-top:6px;max-height:64px;overflow:hidden">${escapeHtml(s.text).slice(0,200)}</div></div><div style="display:flex;flex-direction:column;gap:6px"><button class="btn small" data-id="${s.id}">Use</button><button class="btn small secondary" data-del="${s.id}">Del</button></div>`;
+    snapshotsList.appendChild(el);
+    el.querySelector('[data-id]')?.addEventListener('click',()=>{ mainText.value = s.text; updateCounts(); });
+    el.querySelector('[data-del]')?.addEventListener('click',()=>{ deleteSnapshot(s.id); });
+  })
+}
+function deleteSnapshot(id){
+  const key='plagresium_snapshots';
+  const data=JSON.parse(localStorage.getItem(key)||'[]').filter(x=>x.id!==id);
+  localStorage.setItem(key,JSON.stringify(data)); renderSnapshots();
+}
+
+// Helpers
+function escapeHtml(s){ return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Core check algorithm
+function prepareReferences(){
+  const raw = refs.value.trim();
+  if(!raw) return [];
+  const parts = raw.split(/\n?---\n?/).map(x=>x.trim()).filter(Boolean);
+  return parts;
+}
+
+function computeSimilarity(primary, reference){
+  // two metrics: shingle Jaccard (k=5) and LCS word-length ratio
+  const k = 5;
+  const sA = shingles(primary,k);
+  const sB = shingles(reference,k);
+  const j = jaccard(sA,sB);
+  const lcsWords = LCSwords(primary,reference);
+  const lcsRatio = tokenize(primary).split(' ').filter(Boolean).length===0?0: (lcsWords / Math.max(1, tokenize(primary).split(' ').filter(Boolean).length));
+  // Combine with weights (Jaccard heavier)
+  const score = Math.max( j, lcsRatio ) * 100; // percentage
+  return {jaccard:j, lcsWords, lcsRatio, score: Math.round(score*100)/100};
+}
+
+runCheckBtn.addEventListener('click',()=>{
+  const p = mainText.value.trim(); if(!p){ alert('Primary text khali hai — pehle text dalein.'); return }
+  const refsArr = prepareReferences();
+  if(refsArr.length===0){ alert('Koi reference text nahi mila. Upload ya paste karein.'); return }
+
+  const results = refsArr.map((r,idx)=>{
+    const sim = computeSimilarity(p,r);
+    return {id:idx+1, text: r, sim};
+  }).sort((a,b)=>b.sim.score - a.sim.score);
+
+  // Overall similarity = max similarity across refs
+  const overall = results.length?results[0].sim.score:0;
+  setMeter(overall);
+  renderMatches(results);
+  renderReport(results);
+});
+
+function setMeter(pct){
+  const deg = Math.min(100,Math.max(0,pct)) * 3.6; // 0-360deg
+  meter.style.setProperty('--pct', `${deg}deg`);
+  pctText.textContent = Math.round(pct*100)/100 + '%';
+}
+
+function renderMatches(results){
+  matches.innerHTML = '';
+  results.slice(0,6).forEach(r=>{
+    const el = document.createElement('div'); el.className='list-item';
+    el.innerHTML = `<div style="flex:1"><strong>Reference ${r.id} — ${r.sim.score}%</strong><div class="muted">LCS words: ${r.sim.lcsWords}, Jaccard: ${Math.round(r.sim.jaccard*100)/100}</div></div>`;
+    matches.appendChild(el);
+  });
+}
+
+function renderReport(results){
+  reportArea.innerHTML = '';
+  const t = document.createElement('div'); t.innerHTML = `<table><thead><tr><th>Ref</th><th>Similarity %</th><th>Jaccard</th><th>LCS words</th></tr></thead><tbody>${results.map(r=>`<tr><td>Reference ${r.id}</td><td>${r.sim.score}%</td><td>${Math.round(r.sim.jaccard*100)/100}</td><td>${r.sim.lcsWords}</td></tr>`).join('')}</tbody></table>`;
+  reportArea.appendChild(t);
+}
+
+// Download simple JSON report
+document.getElementById('downloadReport').addEventListener('click',()=>{
+  const p = mainText.value.trim(); if(!p){ alert('Primary text khali hai'); return }
+  const refsArr = prepareReferences();
+  const results = refsArr.map((r,idx)=>({id:idx+1, text:r, sim:computeSimilarity(p,r)}));
+  const payload = {ts:new Date().toISOString(), primaryPreview: p.slice(0,300), results};
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='plagresium-report.json'; a.click(); URL.revokeObjectURL(url);
+});
+
+// Export snapshots
+document.getElementById('exportSnapshots').addEventListener('click',()=>{
+  const key='plagresium_snapshots'; const data = localStorage.getItem(key)||'[]';
+  const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='plagresium-snapshots.json'; a.click(); URL.revokeObjectURL(url);
+});
+
+// Paste sample
+document.getElementById('pasteSample').addEventListener('click',()=>{
+  mainText.value = `This is a sample article to demonstrate Plagresium Checker. Paste your text here and upload references to compare.\n\nYeh ek udaharan hai taaki aap tool kaise kaam karta hai dekh sakein.`; updateCounts();
+});
+
+document.getElementById('clearBtn').addEventListener('click',()=>{ if(confirm('Clear primary text?')){ mainText.value=''; updateCounts(); } });
+
+document.getElementById('saveSnapshot').addEventListener('click',()=>{ saveSnapshot(); alert('Snapshot saved locally (browser storage).'); });
+
+document.getElementById('loadSnapshots').addEventListener('click',()=>{ renderSnapshots(); alert('Saved snapshots loaded in the sidebar.'); });
+
+renderSnapshots();
+
+// Initial sample to show layout
+mainText.value='';
+
+</script>
+</body>
+</html>
